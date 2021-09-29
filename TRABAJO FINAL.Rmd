@@ -1,0 +1,26 @@
+---
+title: "TP FINAL"
+author: "Juan Vargas"
+date: "29/9/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse) 
+library(gifski) 
+library(leaflet)
+library(osmdata)
+library(lubridate)
+library(rgeos)
+library(ggversa)
+library(ggmap)
+library(rvest)
+options(scipen = 999) 
+```
+
+
+#¡¡ NO ES OTRO TRABAJO DE PRECIOS!!
+
+#Trabajo con fechas y espacio
+
+#En este trabajo se analizara el impacto de la cuarentena estrica en los vehiculos particulares para la Ciudad de Buenos Aires, que inicio durante fines del primer trimestre del año 2020. Se desarrolla la siguiente pregunta ¿Cual fue el impacto de la cuarentena en el flujo habitual de vehiculos para la CABA?
