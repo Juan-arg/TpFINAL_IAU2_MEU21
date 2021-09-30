@@ -19,21 +19,22 @@ options(scipen = 999)
 ```
 
 
-#¡¡ NO ES OTRO TRABAJO DE PRECIOS!!
+#¡¡NO ES OTRO TRABAJO DE PRECIOS!!
 
 #Trabajo con fechas y espacio
 
-#En este trabajo se analizara el impacto de la cuarentena estrica en los vehiculos particulares para la Ciudad de Buenos Aires, que inicio durante fines del primer trimestre del año 2020. Se desarrolla la siguiente pregunta ¿Cual fue el impacto de la cuarentena en el flujo habitual de vehiculos para la CABA?
+#En este trabajo se analizará el impacto de la cuarentena estricta en los vehículos particulares para la Ciudad de Buenos Aires, que inicio durante fines del primer trimestre del año 2020. Se desarrolla la siguiente pregunta ¿Cuál fue el impacto de la cuarentena en el flujo habitual de vehículos para la CABA?
 
 #Se trabajan con los datos abiertos del GCBA.
 
-#En esta primera parte se mostrara la variación del flujo vehicular particular para los principales ingresos de la CABA de los años 2019 y 2020
+#En esta primera parte se mostrará la variación del flujo vehicular particular para los principales ingresos de la CABA de los años 2019 y 2020
 
 #AU 25 de mayo
 #AU Dellepiane
 #AU Lugones
 #Au 9 de Julio Sur
 #Au Cantillo
+
 
 
 #Comenzamos por cargar el archivo .csv del año 2019
