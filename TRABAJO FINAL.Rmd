@@ -49,3 +49,231 @@ head(radares2019)
 skimr::skim(radares2019)
 ```
 
+#Trabajamos con con el comando la libreria lubridate y limpiamos los datos para poder mostrar el flujo vehicular por cada mes del año 2019
+
+```{r}
+radares2019 <- radares2019 %>% mutate(fecha = ymd(fecha))
+```
+
+
+
+```{r}
+radares2019_2 <- radares2019 %>% 
+  select(fecha, autopista_nombre, cantidad, lat, long) %>% 
+  group_by(fecha) %>% 
+  summarise(cantidad_fecha=sum(cantidad))
+  
+  ggplot()+
+  geom_col(data = radares2019_2, aes(x= month(fecha, label = TRUE), y= cantidad_fecha, fill=cantidad_fecha))+
+  scale_color_brewer(palette = "Set1")+
+  labs(title = "CANTIDAD DE VEHICULOS 2019",
+       subtitle = "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       fill="Cantidad por Dia")
+```
+
+#Nota: observamos que el flujo vehicular es constante durante el año, mostrando picos de flujo en agosto y septiembre
+
+#De la misma manera lo hacemos para el año 2020
+
+
+```{r}
+radares2020 <- read.csv("flujo-vehicular-por-radares-2020.csv", stringsAsFactors = FALSE) 
+head(radares2020)
+```
+
+```{r}
+skimr::skim(radares2020)
+```
+#Observamos que en la muestra existe un sesgo ya que no estan los datos del mes de agosto
+
+#Trabajamos con la variable fecha de la tabla
+
+```{r}
+radares2020 <- radares2020 %>% mutate(fecha = ymd(fecha))
+```
+
+
+```{r}
+radares2020_2 <- radares2020 %>% 
+  select(fecha, autopista_nombre, cantidad, lat, long) %>% 
+  group_by(fecha) %>% 
+  summarise(cantidad_fecha=sum(cantidad)) %>% 
+  na.omit(radares2020_2)
+  
+ggplot()+
+  geom_col(data = radares2020_2, aes(x= month(fecha, label = TRUE), y= cantidad_fecha, fill=cantidad_fecha))+
+  scale_color_brewer(palette = "Set1")+
+  labs(title = "CANTIDAD DE VEHICULOS 2020",
+       subtitle = "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       fill="Cantidad por dia")
+```
+#Nota: se visualiza que el flujo vehicular disminuyó de manera considerable en casi todo el segundo trimestre, levantando un pico que supera a los meses iniciales de ENE y FEB, para luego volver a disminuir en el inicio del 3er trimestre
+
+#A CONTINUACION COMPARAMOS LOS DATOS POR MESES
+
+#Preparamos el año 2019
+
+```{r}
+radares_meses2019 <- radares2019_2 %>% 
+  mutate(meses2019= month(fecha, label = TRUE)) %>% 
+  select(meses2019, cantidad_fecha) %>% 
+  group_by(meses2019) %>% 
+  summarise(total_mes19 = sum(cantidad_fecha))
+```
+
+#Preparamos el año 2020
+
+```{r}
+radares_meses2020 <- radares2020_2%>% 
+  mutate(meses2020= month(fecha, label = TRUE)) %>% 
+  select(meses2020, cantidad_fecha) %>% 
+  group_by(meses2020) %>% 
+  summarise(total_mes20 = sum(cantidad_fecha))
+```
+
+
+```{r}
+ggplot()+
+  geom_bar(data = radares_meses2019, aes(y= meses2019, weights= total_mes19, fill= "total_mes19" ))+
+  geom_bar(data = radares_meses2020, aes(y= meses2020, weights= total_mes20*-1, fill= "total_mes20" ))+
+  labs(title = "CANTIDAD DE VEHICULOS 2019 / 2020",
+       subtitle= "Radares Ciudad de Buenos Aires",
+       y= "MESES",
+      fill="REFERENCIAS",
+      x = "CANTIDAD")
+```
+
+#Lo vemos en un grafico de puntos y lineas
+
+```{r}
+ggplot()+
+  geom_line(data = radares_meses2019, aes(x=as.integer(meses2019), y= total_mes19), size= 2, color= "red")+
+  geom_point(data= radares_meses2019, aes(x=as.integer(meses2019), y= total_mes19),shape=0, size=5, color="red")+
+  annotate("text", x= 12 , y=65000000, size=4, label= "2019", color= "red")+
+  geom_line(data = radares_meses2020, aes(x=as.integer(meses2020), y= total_mes20), size= 2, color= "blue")+
+  geom_point(data= radares_meses2020, aes(x=as.integer(meses2020), y= total_mes20),shape=0, size=5, color="blue")+
+  annotate("text", x= 12 , y=57000000, size=4, label= "2020", color= "blue")+
+  labs(title = "Variación de flujo vehicular 2019-2020",
+       subtitle = "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       color="año")
+```
+
+#Nota: del contraste del flujo vehicular para los años en curso, se observa una gran caida en el 2do trimestre del año 2020, sin embargo se observa un pico en el volumen de trafico que superó al año 2019, pero luego se mantuvo por debajo de la linea del año 2019
+
+
+
+#ARMAMOS UN GRAFICO DONDE SE MUESTRE LA VARIACIÓN DIARIA Y CONSTANTE PARA LOS AÑOS 2019 Y 2020
+
+```{r}
+data_completa <- rbind(radares2019_2, radares2020_2)%>% 
+  na.omit(data_completa)
+```
+
+
+```{r fig.width = 16 , fig.hight = 8}
+
+ggplot(data_completa, aes(x= as.integer(fecha), y= cantidad_fecha))+
+  geom_line(size= 2, color="red")+
+  geom_point(shape="o", size=5, colour="blue")+
+  labs(title = "FLUJO VEHICULAR EN PANDEMIA",
+       subtitle = "Radares Ciudad de Buenos Aires 2019 / 2020",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="DIAS")
+```
+
+#Motramos la variación del flujo vehiular por mes para cada uno de los radares.
+
+
+```{r fig.width = 10 , fig.hight = 4}
+
+ggplot()+
+  geom_col(data=radares2020, aes(x=autopista_nombre, y=cantidad, fill= autopista_nombre))+
+   facet_wrap(~month(fecha, label = TRUE))+
+    labs(title = "FLUJO VEHICULAR EN CUARENTENA 2020",
+       subtitle = "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="RADARES",
+       fill="Radar")
+
+```
+
+#Nota: se mantiene el cambio negativo mas significativo para el mes de abril
+
+
+#El siguiente grafico muestra la variacion del flujo vehicular segun el sentido del trafico (ingreso "A" /  egreso "B"). 
+
+```{r fig.width = 10 , fig.hight = 4}
+ggplot()+
+  geom_col(data=radares2020, aes(x=autopista_nombre, y=cantidad, fill= autopista_nombre))+
+   facet_wrap(~seccion_sentido)+
+    labs(title = "FLUJO VEHICULAR EN CUARENTENA 2020",
+       subtitle = "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="RADARES",
+       fill="Radar")
+
+```
+
+
+#AHORA MAPEAMOS LOS RESULTADOS
+
+#Usando la información geografica de la tabla armamos un mapa base
+
+
+```{r}
+radares_meses2020 <- radares2020 %>% 
+    filter(lat <0, long <0)
+```
+
+
+
+```{r}
+bbox <- make_bbox(radares2020$long, radares2020$lat)
+
+bbox
+```
+
+```{r}
+CABA <- get_stamenmap(bbox = bbox, maptype = "toner-lite", zoom = 12)
+```
+
+```{r}
+ggmap(CABA)
+```
+
+#El siguiente mapa muestra la variacion vehicular detectada por cada radar para los meses del año 2020
+
+```{r fig.width = 10 , fig.hight = 20}
+ggmap(CABA)+
+  geom_point(data = radares2020, aes(x=long, y=lat, size=cantidad, color =autopista_nombre),alpha=0.5)+
+  facet_wrap(~month(fecha, label = TRUE))+
+  labs(title= "FLUJO VEHICULAR ESPACIAL EN CAURENTENA",
+       subtitle= "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         size="Flujo",
+       color="Radar")
+```
+
+#El siguiente mapa muestra la variacion del flujo vehicular segun el sentido del trafico (ingreso "A" /  egreso "B")
+
+
+```{r fig.width = 10 , fig.hight = 20}
+ggmap(CABA)+
+  geom_point(data = radares2020, aes(x=long, y=lat, size=cantidad, color =autopista_nombre),alpha=0.5)+
+  facet_wrap(~seccion_sentido)+
+  labs(title= "FLUJO VEHICULAR ESPACIAL EN CAURENTENA",
+       subtitle= "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         size="Flujo",
+       color="Radar")
+```
+
+
+#
+
