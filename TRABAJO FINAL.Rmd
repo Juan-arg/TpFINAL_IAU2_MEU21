@@ -275,5 +275,190 @@ ggmap(CABA)+
 ```
 
 
-#
+#AHORA TRABAJAREMOS CON LOS DATOS DE LOS RADARES INTERNOS
+
+
+```{r}
+ FLUJO <- read.csv ("dataset_flujo_vehicular.csv", encoding = "utf-8")
+head(FLUJO)
+```
+
+
+```{r}
+skimr::skim(FLUJO)
+```
+
+#Preparamos los datos para trabajar con fechas
+
+```{r}
+FLUJO <- FLUJO %>% mutate(FECHA = dmy_hms(HORA)) %>% 
+  select(FECHA, CANTIDAD, SENTIDO, LATITUD, LONGITUD)
+```
+
+#Mostramos el registro para el año 2020
+
+```{r}
+FLUJO_2020 <- FLUJO %>%
+  filter(year(FECHA)==2020) %>% 
+  group_by(FECHA) %>% 
+  summarise(CANTIDAD=sum(CANTIDAD))
+
+ggplot()+
+  geom_col(data=FLUJO_2020, aes(x=month(FECHA, label= TRUE),y= CANTIDAD, fill= CANTIDAD))+
+  scale_color_brewer(palette = "Set1")+
+  labs(title = "CANTIDAD DE VEHICULOS 2020",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       fill="Cantidad")
+
+```
+#Observamos que existe una similitud con los registros para el mes de abril
+
+
+#Mostramos el registro para el transcurso del año 2021
+
+
+```{r}
+FLUJO_2021 <- FLUJO %>%
+  filter(year(FECHA)==2021) %>% 
+  group_by(FECHA) %>% 
+  summarise(CANTIDAD=sum(CANTIDAD))
+
+ggplot()+
+  geom_col(data=FLUJO_2021, aes(x=month(FECHA, label= TRUE),y= CANTIDAD, fill= CANTIDAD))+
+  scale_color_brewer(palette = "Set1")+
+  labs(title = "CANTIDAD DE VEHICULOS 2021",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       fill="Cantidad")
+
+```
+
+#Mostramos el registro registrado según el sentido de egreso, ingreso o circulación interna para el año 2020
+
+
+
+```{r}
+FLUJO_RADARES20 <- FLUJO %>%
+  filter(year(FECHA)==2020) %>% 
+  group_by(SENTIDO) %>% 
+  summarise(CANTIDAD=sum(CANTIDAD)) 
+
+ggplot()+
+  geom_col(data=FLUJO_RADARES20 , aes(x=SENTIDO,y= CANTIDAD, fill= SENTIDO))+
+  scale_color_brewer(palette = "Set1")+
+  labs(title = "CANTIDAD DE VEHICULOS 2020",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="TIPO DE CIRCULACION",
+       fill="Sentido")
+```
+
+#Mostramos lo mismo para el transcurso del año 2021
+
+```{r}
+FLUJO_RADARES21 <- FLUJO %>%
+  filter(year(FECHA)==2021) %>% 
+  group_by(SENTIDO) %>% 
+  summarise(CANTIDAD=sum(CANTIDAD))
+ggplot()+
+  geom_col(data=FLUJO_RADARES21 , aes(x=SENTIDO,y= CANTIDAD, fill= SENTIDO))+
+  scale_color_brewer(palette = "Set1")+
+  labs(title = "CANTIDAD DE VEHICULOS 2021",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="TIPO DE CIRCULACION",
+       fill="Sentido")
+
+
+```
+
+#Observamos el sentido de circulación para cada mes del año 2020. Observamos que la circulión interna siemre es mayor que los ingresos y egresos.
+
+
+```{r}
+ggplot()+
+  geom_col(data=FLUJO, aes(x=month(FECHA, label= TRUE),y= CANTIDAD, fill= SENTIDO))+
+  facet_wrap(~SENTIDO)+
+    labs(title = "CANTIDAD DE VEHICULOS 2020",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       fill="Sentido")
+```
+#Ahora comparamos los registro para cada año
+
+
+```{r}
+FLUJO_meses2020 <- FLUJO_2020 %>% 
+  mutate(MESES2020= month(FECHA, label = TRUE)) %>% 
+  select(MESES2020, CANTIDAD) %>% 
+  group_by(MESES2020) %>% 
+  summarise(CANTIDAD_MES20 = sum(CANTIDAD))
+```
+
+
+
+```{r}
+FLUJO_meses2021 <- FLUJO_2021 %>% 
+  mutate(MESES2021= month(FECHA, label = TRUE)) %>% 
+  select(MESES2021, CANTIDAD) %>% 
+  group_by(MESES2021) %>% 
+  summarise(CANTIDAD_MES21 = sum(CANTIDAD))
+```
+
+
+
+
+```{r}
+ggplot()+
+  geom_line(data = FLUJO_meses2020, aes(x=as.integer(MESES2020), y= CANTIDAD_MES20), size= 2, color= "red")+
+  geom_point(data= FLUJO_meses2020, aes(x=as.integer(MESES2020), y= CANTIDAD_MES20),shape=0, size=5, color="red")+
+  annotate("text", x= 12 , y=20000000, size=4, label= "2020", color= "red")+
+  geom_line(data = FLUJO_meses2021, aes(x=as.integer(MESES2021), y= CANTIDAD_MES21), size= 2, color= "blue")+
+  geom_point(data= FLUJO_meses2021, aes(x=as.integer(MESES2021), y= CANTIDAD_MES21),shape=0, size=5, color="blue")+
+  annotate("text", x= 9.5 , y=7000000, size=4, label= "2021", color= "blue")+
+  labs(title = "Variación de flujo vehicular 2020-2021",
+       subtitle = "Radares Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA", y="Cantidad de Vehiculos",
+         x="MES",
+       color="año")
+```
+
+#Mostramos los resultados espacialmente para el año 2020
+
+
+#Mapa para cada mes del año
+
+```{r fig.width = 10 , fig.hight = 20}
+
+ggmap(CABA)+
+  geom_point(data = FLUJO , aes(x=LONGITUD, y=LATITUD, size= CANTIDAD), color= "orange")+
+  facet_wrap(~month(FECHA, label = TRUE))+
+    labs(title = "CANTIDAD DE VEHICULOS 2020",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA")
+```
+#Mapa para cada sentido en el año 2020
+
+```{r fig.width = 10 , fig.hight = 20}
+
+ggmap(CABA)+
+  geom_point(data = FLUJO %>%  filter(year(FECHA)==2020), aes(x=LONGITUD, y=LATITUD, size= CANTIDAD), color= "orange")+
+  facet_wrap(~SENTIDO)+
+    labs(title = "CANTIDAD DE VEHICULOS 2020",
+       subtitle = "Radares Internos Ciudad de Buenos Aires",
+       aption= "Datos Abiertos GCBA")
+```
+
+
+#MOSTRAMOS COMO ES EL IMPACTO EN LOS DISTINTOS PAISES DE LATINOAMERICA DURANTE LA CUARENTENA POR EL COVID-19
+
+#Trafico en periodo de cuarentena en capitales de paises de America Latina (fuente: https://github.com/EL-BID/IDB-IDB-Invest-Coronavirus-Impact-Dashboard)
+
+
+
+
 
