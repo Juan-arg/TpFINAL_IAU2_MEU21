@@ -458,7 +458,45 @@ ggmap(CABA)+
 
 #Trafico en periodo de cuarentena en capitales de paises de America Latina (fuente: https://github.com/EL-BID/IDB-IDB-Invest-Coronavirus-Impact-Dashboard)
 
+```{r}
+TRANSPORTE_LATAM <- read_csv('http://tiny.cc/idb-traffic-weekly')
+head(TRANSPORTE_LATAM)
+```
+
+#Mostramos la variación diaria del promedio general para diciembre de 2020
 
 
+```{r}
+ggplot()+
+  geom_bar(data= TRANSPORTE_LATAM, aes(y=country_name, weight= min_day*-1, fill="min_day"))+
+  geom_bar(data= TRANSPORTE_LATAM, aes(y=country_name, weight= max_day, fill="max_day"))+
+  labs(title = "VARIACION FLUJO VEHICULAR DIARIO EN 2020",
+       subtitle= "Impacto de Pandemia (COVID-19) en LATAM",
+       y= "PAISES",
+      fill="REFERENCIAS",
+      x= "(-)   (+)")
+```
+
+
+#Mostramos el promedio general de la variación mensual para cada pais
+
+
+```{r}
+TRANSPORTE_LATAM_2 <-  TRANSPORTE_LATAM %>%
+  select(country_name, tcp, ratio_20) %>% 
+  group_by(country_name) %>% 
+  rename(c(VARIACION2020="tcp"), c(VARIACION2019="ratio_20"))
+  
+ggplot()+
+  geom_bar(data= TRANSPORTE_LATAM_2, aes(y=country_name, weight= VARIACION2020, fill="VARIACION2020"))+
+  geom_bar(data= TRANSPORTE_LATAM_2, aes(y=country_name, weight= VARIACION2019*100, fill="VARIACION2019"))+
+  labs(title = "VARIACION FLUJO VEHICULAR EN 2020",
+       subtitle= "Impacto de Pandemia (COVID-19) en LATAM",
+       y= "PAISES",
+      fill="REFERENCIAS",
+      x="(-)   (+)")
+```
+
+#Observamos que Brasil fue el país que menos respeto la cuarentena. 
 
 
